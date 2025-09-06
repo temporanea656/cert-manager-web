@@ -2,8 +2,8 @@
 services:
   cert-manager-web:
     build:
-      context: ..
-      dockerfile: web-interface/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     image: cert-manager-web:latest
     container_name: cert-manager-web
     restart: ${RESTART_POLICY:-unless-stopped}
@@ -33,7 +33,7 @@ services:
       # PKI data in named volume for stability
       - cert-data:/etc/easy-rsa
       # Local certificates export directory (accessible from Windows)
-      - ./certificates:/data/certificates
+      - ./web-interface/certificates:/data/certificates
       - logs-data:/data/logs
       
       # Optional: Mount host directories for backup/external access
