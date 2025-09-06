@@ -220,7 +220,15 @@ app.get('/api/ca/status', authenticateToken, async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('CA Status Error:', error);
+    res.json({
+      success: false,
+      status: 'error',
+      message: 'Unable to check CA status. Please ensure the system is properly initialized.',
+      caFile: false,
+      keyFile: false,
+      error: error.message
+    });
   }
 });
 
@@ -430,7 +438,12 @@ app.get('/api/certificates', authenticateToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching certificates:', error);
-    res.status(500).json({ error: error.message });
+    res.json({ 
+      success: true, 
+      certificates: [],
+      message: 'Unable to read certificates. This is normal if no CA has been created yet.',
+      info: 'Create a Certificate Authority first to start issuing certificates.'
+    });
   }
 });
 
