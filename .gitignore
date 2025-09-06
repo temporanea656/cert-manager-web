@@ -5,6 +5,10 @@ certificates/
 *.tar.gz
 *.tar
 
+# Temporary export files
+cert-manager-web.tar.gz
+cert-manager-web.tar
+
 # Node.js
 node_modules/
 npm-debug.log*

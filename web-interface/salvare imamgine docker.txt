@@ -1,5 +1,0 @@
- # Salva l'immagine esistente
-  docker save cert-manager-web:latest -o cert-manager-web.tar
-
-  # O compressa
-  docker save cert-manager-web:latest | gzip > cert-manager-web.tar.gz

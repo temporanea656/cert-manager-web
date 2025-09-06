@@ -15,7 +15,13 @@
       "Bash(docker cp:*)",
       "Bash(winpty docker exec -it cert-manager-web bash -c \"ls -la /etc/easy-rsa/pki/issued/\")",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)",
+      "Bash(docker container prune:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker rm:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
