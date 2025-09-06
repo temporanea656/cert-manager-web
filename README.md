@@ -1,383 +1,577 @@
 # Certificate Manager
 
-Sistema modulare per la gestione di certificati CA (Certificate Authority) per uso hobbistico.
+**🏭 Dual Distribution PKI System for Hobby and Professional Use**
 
-## 🚀 Caratteristiche
+Certificate Manager è un sistema completo per la gestione di Certificate Authority (CA) distribuito in **due versioni complementari**:
 
-- **Gestione completa CA**: Creazione, verifica e gestione Certificate Authority
-- **Certificati Server e Client**: Generazione automatica con configurazione SAN
-- **Firma richieste esterne**: Importazione e firma di file CSR
-- **Lista e rinnovo**: Monitoraggio scadenze e rinnovo certificati
-- **Organizzazione automatica**: Struttura directory pulita e organizzata
-- **Interface colorata**: Output chiaro con codici colore
-- **Comando globale**: Disponibile da qualsiasi directory come `cert-manager`
-- **Setup automatico workspace**: Configurazione completa ambiente Easy-RSA
+## 📦 **Distribution Modes**
 
-## 📋 Prerequisiti
+### 🖥️ **Command Line Interface** 
+**Sistema modulare installabile tramite Make per uso tramite terminale**
+- Installazione: `sudo make install` 
+- Utilizzo: `cert-manager` (comando globale)
+- Target: Amministratori di sistema e utenti CLI
 
-- **Easy-RSA**: Sistema di gestione PKI
-- **OpenSSL**: Per operazioni crittografiche
-- **Bash**: Shell Unix/Linux standard
+### 🌐 **Web Application Interface**
+**Interfaccia web moderna containerizzata tramite Docker**
+- Deployment: `docker-compose up -d`
+- Accesso: Browser web su `http://localhost:3000`
+- Target: Utenti che preferiscono interfacce grafiche
 
-### Installazione prerequisiti
+---
 
+## 🚀 Features Overview
+
+### Core PKI Management
+- **Complete CA Operations**: Creation, verification, and management of Certificate Authority
+- **Server & Client Certificates**: Automated generation with Subject Alternative Names (SAN)
+- **External CSR Signing**: Import and sign external certificate requests
+- **Certificate Lifecycle**: List, monitor expiration, and renewal
+- **Organized Structure**: Clean directory structure with automatic organization
+- **Security-First**: Proper permissions, backup strategies, audit logging
+
+### Web Interface Exclusive Features
+- **Modern Dashboard**: Real-time PKI overview with interactive charts
+- **JWT Authentication**: Secure token-based user authentication
+- **API Integration**: RESTful API for programmatic access
+- **Docker Ready**: Full containerization with multi-stage builds
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **Health Monitoring**: Built-in system health checks
+
+---
+
+## 📋 Prerequisites
+
+### For Command Line Installation
+- **Easy-RSA**: PKI management system
+- **OpenSSL**: Cryptographic operations
+- **Bash**: Standard Unix/Linux shell
+- **Linux/Unix Environment**
+
+### For Web Application (Docker)
+- **Docker Engine 20.10+**
+- **Docker Compose 2.0+**
+- **2GB RAM minimum**
+- **10GB disk space**
+
+### Installing Prerequisites
 **Ubuntu/Debian:**
 ```bash
 sudo apt update
-sudo apt install easy-rsa openssl
+sudo apt install easy-rsa openssl docker.io docker-compose
 ```
 
 **CentOS/RHEL:**
 ```bash
-sudo yum install easy-rsa openssl
+sudo yum install easy-rsa openssl docker docker-compose
 ```
 
 **Arch Linux:**
 ```bash
-sudo pacman -S easy-rsa openssl
+sudo pacman -S easy-rsa openssl docker docker-compose
 ```
 
-## 📁 Struttura del progetto
+---
 
+## 🔧 Installation & Quick Start
+
+## 📁 Project Structure
 ```
 cert-manager/
-├── cert-manager              # Script principale
-├── install.sh               # Script di installazione
-├── Makefile                 # Automazione installazione
-├── README.md               # Questa documentazione
-├── easyrsa                 # Template script Easy-RSA
-├── openssl-easyrsa.cnf     # Template configurazione OpenSSL
-├── vars                    # Template parametri CA
-└── modules/                # Moduli funzionali
-    ├── verificaCA.sh       # Verifica presenza CA
-    ├── parametriVARS.sh    # Gestione parametri VARS
-    ├── creazioneCA.sh      # Creazione Certificate Authority
-    ├── creazioneSERVER.sh  # Generazione certificati server
-    ├── creazioneCLIENT.sh  # Generazione certificati client
-    ├── firmaCSR.sh         # Firma richieste certificate
-    ├── listaCERTIFICATI.sh # Lista e gestione certificati
-    └── rinnovoCERTIFICATI.sh # Rinnovo certificati
+├── 🐳 Docker Configuration
+│   ├── Dockerfile                 # Container build configuration
+│   ├── docker-compose.yml         # Multi-service orchestration
+│   └── .dockerignore              # Build context exclusions
+├── 🖥️ Command Line System
+│   ├── cert-manager               # Main CLI script
+│   ├── install.sh                # Installation script
+│   ├── Makefile                   # Build automation
+│   ├── easyrsa                    # Easy-RSA template script
+│   ├── openssl-easyrsa.cnf        # OpenSSL configuration template
+│   ├── vars                       # CA parameters template
+│   └── modules/                   # Functional modules
+│       ├── verificaCA.sh          # CA verification
+│       ├── parametriVARS.sh       # VARS parameter management
+│       ├── creazioneCA.sh         # Certificate Authority creation
+│       ├── creazioneSERVER.sh     # Server certificate generation
+│       ├── creazioneCLIENT.sh     # Client certificate generation
+│       ├── firmaCSR.sh            # Certificate signing requests
+│       ├── listaCERTIFICATI.sh    # Certificate listing & management
+│       └── rinnovoCERTIFICATI.sh  # Certificate renewal
+└── 🌐 Web Interface
+    ├── web-interface/
+    │   ├── server.js              # Node.js backend API
+    │   ├── package.json           # Backend dependencies
+    │   ├── .env.example           # Environment configuration template
+    │   └── frontend/              # React frontend application
+    │       ├── src/
+    │       ├── public/
+    │       └── package.json       # Frontend dependencies
+    └── certificates/              # Generated certificates export directory
 ```
 
-## 🔧 Installazione
+---
 
-### Metodo 1: Makefile (Raccomandato)
+## 🖥️ Command Line Interface Installation
 
+### Method 1: Makefile (Recommended)
 ```bash
-# Clona o scarica il progetto
-git clone <repository-url> cert-manager
+# Clone repository
+git clone https://github.com/yourusername/cert-manager.git
 cd cert-manager
 
-# Verifica i file
+# Verify files
 make check
 
-# Installa come comando di sistema
+# Install as system command
 sudo make install
 
-# Verifica installazione
+# Verify installation
 cert-manager --version
 ```
 
-### Metodo 2: Script di installazione
-
+### Method 2: Installation Script
 ```bash
-# Rendi eseguibile lo script di installazione
+# Make installation script executable
 chmod +x install.sh
 
-# Installa completo
+# Complete installation
 sudo ./install.sh
 
-# Solo workspace Easy-RSA
+# Workspace only setup
 sudo ./install.sh setup-workspace
 
-# Disinstalla
+# Uninstall
 sudo ./install.sh uninstall
 ```
 
-### Metodo 3: Solo workspace (se hai già il comando)
-
+### CLI Usage
 ```bash
-# Setup solo ambiente di lavoro
-sudo make setup-workspace
-```
-
-## 🎯 Comandi disponibili
-
-### 🔧 **Makefile - Nuove funzionalità:**
-
-- **`make check`** - Verifica file e workspace Easy-RSA (non installa)
-- **`make install`** - Installazione completa (comando + workspace)
-- **`make setup-workspace`** - Solo setup workspace Easy-RSA
-- **`make info`** - Diagnostica completa del sistema
-- **`make test`** - Verifica sintassi dei file
-- **`make uninstall`** - Rimozione completa
-
-### 🔧 **install.sh - Nuove funzionalità:**
-
-- **`sudo ./install.sh`** - Installazione completa
-- **`sudo ./install.sh setup-workspace`** - Solo setup workspace Easy-RSA
-- **`sudo ./install.sh uninstall`** - Disinstallazione con opzioni
-- **Setup automatico workspace** Easy-RSA in `/etc/easy-rsa`
-- **Backup intelligente** di file esistenti in `backup.old/`
-
-## 📂 **Struttura finale dopo installazione:**
-
-```
-/opt/cert-manager/          # Software installato
-├── cert-manager           # Comando principale  
-├── modules/              # Moduli funzionali
-└── templates/            # File template
-
-/etc/easy-rsa/             # Workspace operativo
-├── easyrsa               # Script Easy-RSA
-├── openssl-easyrsa.cnf   # Config OpenSSL
-├── vars                  # Parametri CA
-├── client/               # Certificati client
-├── server/               # Certificati server  
-├── pending-requests/     # CSR in attesa
-├── signed-certificates/  # Certificati firmati
-├── processed-requests/   # CSR processate
-├── backup.old/          # Backup file esistenti
-└── pki/                 # PKI (creata con CA)
-```
-
-## 🎯 Utilizzo
-
-### Avvio del sistema
-
-```bash
-# Avvia il menu interattivo
+# Start interactive menu
 cert-manager
 
-# Verifica rapida del sistema
+# System quick check
 cert-manager --check
 
-# Mostra l'aiuto
+# Show help
 cert-manager --help
 ```
 
-### Menu principale
+### CLI Workflow
+1. **Initial Setup**: `sudo make install`
+2. **Configure VARS**: `cert-manager` → option 2 (country, organization, etc.)
+3. **Create CA**: `cert-manager` → option 3
+4. **Generate Certificates**: Options 4 (server) or 5 (client)
+5. **Manage Certificates**: Option 7 (list, renew, monitor expiration)
 
-```
-===== MENU PRINCIPALE =====
+---
 
-1) Verifica dati CA
-2) Gestisci parametri VARS per CA
-3) Genera nuovo certificato CA
-4) Genera certificato server
-5) Genera certificato client
-6) Genera certificato da richiesta
-7) Lista e gestione certificati
-8) Informazioni sistema
-0) Esci
-```
+## 🌐 Web Application Deployment
 
-## 🏗️ Workflow tipico
-
-### 1. Prima configurazione
-
-1. **Installa Certificate Manager**: `sudo make install`
-2. **Avvia Certificate Manager**: `cert-manager`
-3. **Configura parametri VARS** (opzione 2):
-   - Paese, provincia, città
-   - Organizzazione ed email
-   - Scadenze CA e certificati
-4. **Crea Certificate Authority** (opzione 3)
-
-### 2. Generazione certificati
-
-**Per un server web:**
+### Quick Docker Deployment
 ```bash
-cert-manager
-# Opzione 4 - Genera certificato server
-# Inserisci: nome-server, IP, DNS
+# Clone repository
+git clone https://github.com/yourusername/cert-manager.git
+cd cert-manager
+
+# Configure environment
+cp web-interface/.env.example web-interface/.env
+# Edit .env with your settings
+
+# Start web application
+docker-compose up -d
+
+# Check status
+docker-compose ps
 ```
 
-**Per un client:**
-```bash
-cert-manager
-# Opzione 5 - Genera certificato client
-# Inserisci: nome-client, email (opzionale)
+### Web Interface Access
+- **URL**: http://localhost:3000
+- **Default Username**: `admin`
+- **Default Password**: `change-this-password` (configure in `.env`)
+
+### Web Application Features
+#### Dashboard
+- **PKI Overview**: Real-time status of CA and certificates
+- **Visual Analytics**: Charts showing certificate types and expiration status
+- **Quick Actions**: Direct access to common operations
+
+#### Certificate Management
+- **CA Operations**: Create and manage Certificate Authority through web UI
+- **Server Certificates**: Generate with Subject Alternative Names (SAN)
+- **Client Certificates**: User and device certificate generation
+- **CSR Processing**: Upload and sign external certificate requests
+- **Download Center**: Secure certificate and key download
+
+#### Security
+- **JWT Authentication**: Secure token-based authentication
+- **Rate Limiting**: API protection against abuse
+- **Input Validation**: Comprehensive security validation
+- **Audit Logging**: Complete operation tracking
+
+---
+
+## ⚙️ Configuration
+
+### Environment Variables (Web Application)
+```env
+# Security (CHANGE THESE!)
+JWT_SECRET=your-super-secret-jwt-key-change-this
+ADMIN_USER=admin
+ADMIN_PASS=your-secure-password-change-this
+
+# Server Configuration
+NODE_ENV=production
+PORT=3000
+HOST_PORT=3000
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# File Upload
+MAX_FILE_SIZE=10485760
+
+# Docker
+RESTART_POLICY=unless-stopped
+TZ=Europe/Rome
 ```
 
-### 3. Gestione certificati
-
-```bash
-cert-manager
-# Opzione 7 - Lista certificati
-# Visualizza scadenze e stato
-# Rinnova certificati in scadenza
-```
-
-## 🔐 Gestione richieste certificate esterne
-
-Per firmare richieste generate esternamente:
-
-1. Copia il file `.csr` in `/etc/easy-rsa/pending-requests/`
-2. Usa l'opzione 6 del menu
-3. Il sistema analizza automaticamente la richiesta
-4. Conferma il tipo (server/client) e firma
-5. Il certificato viene spostato nella directory appropriata
-
-## 🔄 Rinnovo certificati
-
-Il sistema monitora automaticamente le scadenze:
-
-- **Verde**: Certificato valido (>30 giorni)
-- **Giallo**: In scadenza (7-30 giorni)
-- **Rosso**: Scaduto o in scadenza critica (<7 giorni)
-
-Per rinnovare:
-1. Lista certificati (opzione 7)
-2. Seleziona "Rinnova certificato"
-3. Il sistema mantiene la stessa chiave privata
-4. Genera nuovo certificato con stessa configurazione
-
-## ⚙️ Configurazione avanzata
-
-### Parametri VARS personalizzabili
-
+### VARS Configuration (Both Interfaces)
 ```bash
 # File: /etc/easy-rsa/vars
 
-# Informazioni organizzazione
+# Organization Information
 EASYRSA_REQ_COUNTRY="IT"
-EASYRSA_REQ_PROVINCE="Tuscany"
+EASYRSA_REQ_PROVINCE="Tuscany" 
 EASYRSA_REQ_CITY="Prato"
 EASYRSA_REQ_ORG="MyOrganization"
 EASYRSA_REQ_EMAIL="admin@example.com"
 EASYRSA_REQ_OU="IT Department"
 
-# Scadenze (in giorni)
-EASYRSA_CA_EXPIRE=3650        # CA: 10 anni
-EASYRSA_CERT_EXPIRE=365       # Certificati: 1 anno
+# Expiration Settings (in days)
+EASYRSA_CA_EXPIRE=3650        # CA: 10 years
+EASYRSA_CERT_EXPIRE=365       # Certificates: 1 year
 
-# Sicurezza
-EASYRSA_KEY_SIZE=2048         # Dimensione chiave (2048/4096)
-EASYRSA_DIGEST="sha512"       # Algoritmo hash
+# Security Settings
+EASYRSA_KEY_SIZE=2048         # Key size (2048/4096)
+EASYRSA_DIGEST="sha256"       # Hash algorithm
 ```
 
-### Subject Alternative Names (SAN)
+---
 
-I certificati server supportano automaticamente:
-- **DNS names**: `www.example.com`, `example.com`
-- **IP addresses**: `192.168.1.100`, `10.0.0.1`
+## 📊 Architecture
 
-## 🚀 **Esempi di installazione:**
+### Web Application Architecture
+```
+Frontend (React 18)
+├── Dashboard & Analytics
+├── Certificate Management UI  
+├── CSR Processing Interface
+└── Authentication System
 
+Backend (Node.js/Express)
+├── RESTful API Endpoints
+├── JWT Authentication
+├── File Upload Handling
+└── CLI Script Integration
+
+Docker Container
+├── Multi-stage Build
+├── Alpine Linux Base
+├── Volume Persistence
+└── Health Monitoring
+
+PKI Integration
+├── Easy-RSA Integration
+├── Original cert-manager modules
+└── OpenSSL Operations
+```
+
+### API Endpoints
+```
+Authentication:
+POST /api/auth/login                    # User login
+
+CA Management:
+GET  /api/ca/status                     # CA status check
+POST /api/ca/create                     # Create new CA
+GET  /api/ca/download                   # Download CA certificate
+GET  /api/ca/download-key               # Download CA private key
+
+Certificates:
+GET  /api/certificates                  # List all certificates
+POST /api/certificates/server           # Generate server certificate
+POST /api/certificates/client           # Generate client certificate  
+POST /api/certificates/:name/renew      # Renew certificate
+GET  /api/certificates/:name/download/:type # Download certificate files
+
+CSR Processing:
+POST /api/csr/upload                    # Upload and process CSR
+
+System:
+GET  /api/health                        # Health check endpoint
+```
+
+---
+
+## 🔐 Security Features
+
+### Command Line Security
+- **Root Detection**: Automatic privilege verification
+- **File Permissions**: Secure 600 permissions for private keys
+- **Backup Strategy**: Automatic backup of existing files
+- **Input Validation**: Safe parameter handling
+
+### Web Application Security  
+- **JWT Authentication**: Stateless secure tokens
+- **Password Hashing**: bcrypt with salt rounds
+- **Rate Limiting**: API abuse prevention
+- **Input Sanitization**: Comprehensive validation
+- **CORS Protection**: Cross-origin request control
+- **Container Security**: Non-root user, read-only filesystem
+- **Network Isolation**: Private Docker networks
+
+---
+
+## 🚀 Production Deployment
+
+### SSL/HTTPS Setup (Web Application)
 ```bash
-# Installazione completa
-sudo make install
+# Generate SSL certificates (using your CA!)
+mkdir -p nginx/ssl
+cp your-domain.crt nginx/ssl/
+cp your-domain.key nginx/ssl/
 
-# Solo verifica (non installa)
-make check
+# Enable reverse proxy with SSL
+docker-compose --profile with-proxy up -d
+```
 
-# Solo workspace  
-sudo make setup-workspace
+### Backup Strategy
+```bash
+# Create backup script
+cat > backup-cert-data.sh << 'EOF'
+#!/bin/bash
+DATE=$(date +%Y%m%d_%H%M%S)
 
-# Informazioni sistema
+# Backup CLI workspace
+tar -czf "cli-backup-$DATE.tar.gz" /etc/easy-rsa
+
+# Backup Docker volumes
+docker run --rm -v cert-manager_cert-data:/data -v $(pwd):/backup alpine \
+  tar czf /backup/docker-backup-$DATE.tar.gz -C /data .
+
+echo "Backups created: cli-backup-$DATE.tar.gz, docker-backup-$DATE.tar.gz"
+EOF
+
+chmod +x backup-cert-data.sh
+```
+
+### Monitoring
+```bash
+# CLI system check
+cert-manager --check
 make info
 
-# Con install.sh
-sudo ./install.sh              # Completo
-sudo ./install.sh setup-workspace  # Solo workspace
-sudo ./install.sh uninstall    # Disinstallazione sicura
+# Web application health
+curl http://localhost:3000/api/health
+docker-compose logs -f cert-manager-web
+
+# Enable monitoring stack
+docker-compose --profile monitoring up -d
 ```
 
-## 🔍 Risoluzione problemi
+---
 
-### Errore: "Easy-RSA non trovato"
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### CLI Installation Issues
 ```bash
-# Installa Easy-RSA
+# Easy-RSA not found
 sudo apt install easy-rsa     # Ubuntu/Debian
 sudo yum install easy-rsa     # CentOS/RHEL
+
+# Permission errors
+sudo make install             # Use sudo for installation
+
+# Workspace verification
+make check                    # Verify workspace
+cert-manager --check          # Test command
 ```
 
-### Errore: "Permessi insufficienti"
+#### Web Application Issues
 ```bash
-# Assicurati di usare sudo per l'installazione
-sudo make install
+# Container won't start
+docker-compose logs cert-manager-web
+
+# Authentication fails  
+docker-compose exec cert-manager-web env | grep ADMIN
+
+# Certificates not persisting
+docker inspect cert-manager-web | grep -A 10 Mounts
+
+# API not responding
+curl http://localhost:3000/api/health
 ```
 
-### Verifica completa del sistema
+### Reset Procedures
 ```bash
-# Diagnostica completa
-make info
-
-# Verifica workspace
-make check
-
-# Test del comando
-cert-manager --check
-```
-
-### Certificato non valido
-```bash
-# Verifica certificato
-openssl x509 -in certificato.crt -text -noout
-
-# Verifica catena di certificati
-openssl verify -CAfile ca.crt certificato.crt
-```
-
-### Reset completo workspace
-```bash
-# ATTENZIONE: Elimina tutti i certificati!
+# CLI complete reset (DELETES ALL CERTIFICATES!)
 sudo rm -rf /etc/easy-rsa
-sudo make setup-workspace    # Ricrea workspace
-cert-manager                 # Ricrea CA
+sudo make setup-workspace
+cert-manager  # Recreate CA
+
+# Web application reset
+docker-compose down -v
+docker-compose up -d
 ```
 
-## 🔧 Disinstallazione
+---
 
-### Con Makefile
+## 🛠️ Development
+
+### Local Development Setup
 ```bash
-sudo make uninstall
+# Install all dependencies
+npm run install:all
+
+# Start development mode
+docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+
+# Or run locally
+cd web-interface
+npm run dev
 ```
 
-### Con script (più opzioni)
+### Testing
 ```bash
-# Disinstallazione interattiva con scelta per workspace
-sudo ./install.sh uninstall
+# CLI system test
+make test
+
+# Web application tests
+cd web-interface
+npm test
+
+# API testing
+TOKEN=$(curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"your-password"}' | jq -r .token)
+
+curl -H "Authorization: Bearer $TOKEN" http://localhost:3000/api/ca/status
 ```
 
-### Manuale
+---
+
+## 📦 Docker Commands Reference
+
+### Basic Operations
 ```bash
-sudo rm /usr/local/bin/cert-manager
-sudo rm -rf /opt/cert-manager
-# Opzionale: sudo rm -rf /etc/easy-rsa
+# Build and start
+docker-compose up -d --build
+
+# View logs
+docker-compose logs -f cert-manager-web
+
+# Stop services
+docker-compose down
+
+# Complete cleanup with volumes
+docker-compose down -v --remove-orphans
 ```
 
-## ✨ **Miglioramenti del sistema:**
+### Maintenance
+```bash
+# Update containers
+docker-compose pull
+docker-compose up -d
 
-1. **Comando globale**: Disponibile da qualsiasi directory
-2. **Gestione parametri**: `--help`, `--version`, `--check`
-3. **Verifica prerequisiti**: Controllo automatico Easy-RSA e OpenSSL
-4. **Setup automatico workspace**: Configurazione completa `/etc/easy-rsa`
-5. **Backup intelligente**: Salvataggio automatico file esistenti
-6. **Installazione modulare**: Software in `/opt`, workspace in `/etc`
-7. **Disinstallazione sicura**: Opzioni per mantenere certificati
+# Execute commands in container
+docker-compose exec cert-manager-web bash
 
-## 📝 Note importanti
+# Backup Docker volumes
+docker run --rm -v cert-manager_cert-data:/data -v $(pwd):/backup alpine \
+  tar czf /backup/cert-data-backup.tar.gz -C /data .
+```
 
-- **Backup regolari**: Esegui backup di `/etc/easy-rsa/`
-- **Sicurezza chiavi**: Le chiavi private hanno permessi 600
-- **Scadenze**: Monitora regolarmente le scadenze
-- **Testing**: Testa sempre i certificati dopo la generazione
-- **Uso hobbistico**: Questo sistema è progettato per ambienti di test/sviluppo
-- **Workspace separato**: Software in `/opt`, dati operativi in `/etc/easy-rsa`
+---
 
-## 🤝 Contributi
+## 🎯 Use Cases & Examples
 
-Questo è un progetto per uso hobbistico. Suggerimenti e miglioramenti sono benvenuti!
+### Home Lab Setup (CLI)
+```bash
+sudo make install
+cert-manager
+# Option 2: Configure organization
+# Option 3: Create CA
+# Option 4: Generate server cert for home.local
+```
 
-## 📞 Supporto
+### Enterprise Web Interface
+```bash
+# Production deployment with SSL
+cp production.env .env
+docker-compose --profile with-proxy up -d
+# Access via https://cert-manager.company.com
+```
 
-Per problemi:
-1. Controlla i log con `cert-manager --check`
-2. Usa `make info` per diagnostica completa
-3. Verifica workspace con `make check`
+### Development Environment
+```bash
+# Quick development CA
+docker-compose up -d
+# Login via web: http://localhost:3000
+# Create CA, generate dev certificates
+```
 
-## 📄 Licenza
+---
 
-Progetto open source per uso hobbistico ed educativo.
+## 🤝 Contributing
+
+### Development Workflow
+1. Fork repository
+2. Create feature branch  
+3. Test both CLI and web interfaces
+4. Submit pull request
+
+### Code Standards
+- **ESLint**: Code linting
+- **Prettier**: Code formatting
+- **Conventional Commits**: Commit messages
+- **Docker**: All features must work in containers
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - open source for hobby and educational use.
+
+---
+
+## 🆘 Support & Documentation
+
+### Quick Help
+```bash
+# CLI help
+cert-manager --help
+make help
+
+# Web application 
+curl http://localhost:3000/api/health
+docker-compose logs cert-manager-web
+```
+
+### Resources
+- **Easy-RSA Documentation**: https://easy-rsa.readthedocs.io/
+- **Docker Documentation**: https://docs.docker.com/
+- **OpenSSL Documentation**: https://www.openssl.org/docs/
+
+### Community
+- **Issues**: Bug reports and feature requests
+- **Discussions**: Questions and community support
+- **Pull Requests**: Code contributions
+
+---
+
+**Certificate Manager v1.0 - Dual Distribution PKI System**  
+*🖥️ CLI Ready • 🌐 Web Ready • 🐳 Container Ready • 🔒 Security First*
