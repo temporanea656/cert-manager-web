@@ -1,0 +1,103 @@
+# Docker Compose Override for Development
+# This file provides development-specific configurations
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+
+
+services:
+  cert-manager-web:
+    # Development-specific configurations
+    build:
+      target: production
+      args:
+        - NODE_ENV=development
+    
+    # Development environment variables
+    environment:
+      NODE_ENV: development
+      LOG_LEVEL: debug
+      
+    # Mount source code for live reload (development only)
+    volumes:
+      # PKI data in named volume for stability
+      - cert-data:/etc/easy-rsa
+      # Local certificates export directory (accessible from Windows)
+      - ./certificates:/data/certificates
+      - logs-data:/data/logs
+      
+    # Development ports
+    ports:
+      - "3000:3000"
+      - "9229:9229"  # Node.js debugger port
+      
+    # Override command for development 
+    command: npm start
+    
+    # Development security (less restrictive)
+    security_opt: []
+    
+    # Development logging (more verbose)
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+# Development-only services
+  # Database for user management (development/testing)
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: cert-manager-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cert_manager_dev
+      POSTGRES_USER: cert_manager
+      POSTGRES_PASSWORD: dev_password_123
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-data-dev:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - cert-manager-network
+    profiles:
+      - dev-db
+      
+  # Redis for session storage (development/testing)
+  redis-dev:
+    image: redis:7-alpine
+    container_name: cert-manager-redis-dev
+    restart: unless-stopped
+    volumes:
+      - redis-data-dev:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - cert-manager-network
+    profiles:
+      - dev-cache
+
+  # Development tools container
+  dev-tools:
+    image: cert-manager-web:latest
+    container_name: cert-manager-dev-tools
+    entrypoint: /bin/bash
+    stdin_open: true
+    tty: true
+    volumes:
+      # PKI data in named volume for stability  
+      - cert-data:/etc/easy-rsa
+      # Local certificates export directory (accessible from Windows)
+      - ./certificates:/data/certificates
+      - ./:/app
+    networks:
+      - cert-manager-network
+    profiles:
+      - dev-tools
+
+volumes:
+  # Development-specific volumes
+  postgres-data-dev:
+    driver: local
+    
+  redis-data-dev:
+    driver: local

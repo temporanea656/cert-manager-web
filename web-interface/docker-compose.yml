@@ -1,0 +1,120 @@
+
+services:
+  cert-manager-web:
+    build:
+      context: ..
+      dockerfile: web-interface/Dockerfile
+    image: cert-manager-web:latest
+    container_name: cert-manager-web
+    restart: ${RESTART_POLICY:-unless-stopped}
+    ports:
+      - "${HOST_PORT:-3000}:3000"
+    environment:
+      # Server Configuration
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+      
+      # Security
+      JWT_SECRET: ${JWT_SECRET:-please-change-this-secret-in-production}
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASS: ${ADMIN_PASS:-change-this-password}
+      
+      # Rate Limiting
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
+      
+      # File Upload
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-10485760}
+      
+      # Timezone
+      TZ: ${TZ:-Europe/Rome}
+      
+    volumes:
+      # PKI data in named volume for stability
+      - cert-data:/etc/easy-rsa
+      # Local certificates export directory (accessible from Windows)
+      - ./certificates:/data/certificates
+      - logs-data:/data/logs
+      
+      # Optional: Mount host directories for backup/external access
+      # - ${HOST_CERT_BACKUP_DIR:-./cert-backup}:/data/cert-backup:rw
+      
+    networks:
+      - cert-manager-network
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          memory: 256M
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Reverse proxy with SSL termination
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: cert-manager-nginx
+    restart: ${RESTART_POLICY:-unless-stopped}
+    ports:
+      - "${HTTPS_PORT:-443}:443"
+      - "${HTTP_PORT:-80}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - logs-data:/var/log/nginx
+    networks:
+      - cert-manager-network
+    depends_on:
+      cert-manager-web:
+        condition: service_healthy
+    profiles:
+      - with-proxy
+    
+    # Only start nginx if profile is enabled
+    # Use: docker-compose --profile with-proxy up
+
+  # Optional: Log aggregator for production monitoring
+  log-aggregator:
+    image: fluent/fluentd:edge
+    container_name: cert-manager-logs
+    restart: ${RESTART_POLICY:-unless-stopped}
+    volumes:
+      - logs-data:/fluentd/log
+      - ./fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro
+    networks:
+      - cert-manager-network
+    profiles:
+      - monitoring
+
+volumes:
+  # PKI volume for certificate data
+  cert-data:
+    driver: local
+  
+  # Logs volume
+  logs-data:
+    driver: local
+
+networks:
+  cert-manager-network:
+    driver: bridge
+    name: cert-manager-network

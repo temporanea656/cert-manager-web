@@ -1,0 +1,299 @@
+#!/bin/bash
+
+# cert_manager - Certificate Manager per Easy-RSA
+# Versione: 2.0
+# Uso hobbistico e ambienti di test
+
+# Verifica se è stata richiesta l'help
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+    cat << 'EOF'
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                            CERTIFICATE MANAGER                              ║
+║                                 Versione 2.0                                ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+DESCRIZIONE:
+    Certificate Manager è uno script modulare per la gestione completa di 
+    certificati X.509 tramite Easy-RSA 3. Progettato per uso hobbistico e 
+    ambienti di test/sviluppo.
+
+UTILIZZO:
+    cert_manager                 Avvia l'interfaccia interattiva
+    cert_manager --help         Mostra questo help
+    cert_manager -h             Mostra questo help
+
+FUNZIONALITÀ PRINCIPALI:
+    • Gestione Certificate Authority (CA)
+    • Generazione certificati server con SAN
+    • Generazione certificati client
+    • Firma richieste CSR esterne
+    • Rinnovo certificati esistenti
+    • Monitoraggio scadenze
+    • Gestione parametri di configurazione
+
+PREREQUISITI:
+    • Easy-RSA 3 installato
+    • OpenSSL
+    • Permessi di amministratore
+    • Directory /etc/easy-rsa accessibile
+
+STRUTTURA FILE:
+    /etc/easy-rsa/                    Directory base Easy-RSA
+    ├── vars                          Configurazione parametri
+    ├── pki/ca.crt                   Certificato CA
+    ├── pki/private/ca.key           Chiave privata CA
+    ├── [server-name]/               Directory certificati server
+    ├── client/                      Directory certificati client
+    ├── pending-requests/            CSR da processare
+    └── signed-certificates/         Certificati firmati
+
+MENU PRINCIPALE:
+    1) Verifica dati CA              Controlla stato Certificate Authority
+    2) Gestisci parametri VARS       Configura parametri di default
+    3) Genera nuovo certificato CA   Crea nuova Certificate Authority
+    4) Genera certificato server     Crea certificati per servizi
+    5) Genera certificato client     Crea certificati per utenti/dispositivi
+    6) Genera certificato da richiesta  Firma CSR esterne
+    7) Lista e gestione certificati  Visualizza e gestisce certificati
+    0) Esci                          Termina il programma
+
+CARATTERISTICHE:
+    • Interfaccia a menu interattiva
+    • Validazione automatica input
+    • Gestione errori completa
+    • Backup automatico configurazioni
+    • Supporto Subject Alternative Names (SAN)
+    • Monitoraggio scadenze con allarmi
+    • Organizzazione file strutturata
+    • Help contestuale integrato
+
+SICUREZZA:
+    • Chiavi private protette (chmod 600)
+    • Generazione certificati senza password
+    • Algoritmo hash SHA-512
+    • Validazione rigorosa input utente
+    • Backup automatico prima modifiche critiche
+
+ESEMPI D'USO:
+    # Avvia il programma
+    cert_manager
+    
+    # Prima configurazione:
+    # 1. Opzione 2: Configura parametri VARS
+    # 2. Opzione 3: Crea Certificate Authority
+    # 3. Opzione 4/5: Genera certificati
+    
+    # Gestione quotidiana:
+    # 1. Opzione 7: Controlla scadenze
+    # 2. Rinnova certificati se necessario
+    # 3. Genera nuovi certificati al bisogno
+
+PERCORSI IMPORTANTI:
+    Script principale:        /usr/local/bin/cert_manager
+    Moduli:                   /usr/local/lib/cert_manager/modules/
+    Configurazione Easy-RSA:  /etc/easy-rsa/
+    Log sistema:              /var/log/syslog
+
+SUPPORTO:
+    Per problemi di funzionamento:
+    • Verifica prerequisiti installati
+    • Controlla permessi su /etc/easy-rsa/
+    • Esegui come amministratore (sudo)
+    • Consulta log di sistema per errori
+
+VERSIONE:
+    Certificate Manager 2.0
+    Compatible con Easy-RSA 3.x
+    Testato su Debian/Ubuntu
+
+AUTORE:
+    Script sviluppato per uso hobbistico
+    Basato su Easy-RSA
+    Sviluppato tramite Claude.ai da Andrea Bozzi
+
+LICENZA:
+    Per uso personale
+    Utilizzare a proprio rischio
+
+═══════════════════════════════════════════════════════════════════════════════
+EOF
+    exit 0
+fi
+
+# Definisci la directory base dove si trova lo script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MODULE_DIR="$SCRIPT_DIR/modules"
+
+# Se lo script è installato come comando di sistema, usa il percorso corretto
+if [[ "$SCRIPT_DIR" == "/usr/local/bin" ]] || [[ "$SCRIPT_DIR" == "/usr/bin" ]]; then
+    MODULE_DIR="/opt/cert-manager/modules"
+fi
+
+# Carica i moduli
+echo "Certificate Manager - Caricamento moduli..."
+
+# Lista moduli da caricare
+modules=(
+    "verificaCA.sh"
+    "parametriVARS.sh" 
+    "creazioneCA.sh"
+    "creazioneSERVER.sh"
+    "creazioneCLIENT.sh"
+    "firmaCSR.sh"
+    "listaCERTIFICATI.sh"
+    "rinnovoCERTIFICATI.sh"
+)
+
+# Carica ogni modulo
+for module in "${modules[@]}"; do
+    module_path="$MODULE_DIR/$module"
+    if [[ -f "$module_path" ]]; then
+        source "$module_path"
+        echo "✓ Caricato: $module"
+    else
+        echo "✗ ERRORE: Modulo non trovato: $module_path"
+        echo ""
+        echo "Per risolvere il problema:"
+        echo "1. Verifica che tutti i moduli siano nella directory: $MODULES_DIR"
+        echo "2. Controlla i permessi di lettura sui file"
+        echo "3. Se necessario, reinstalla cert_manager"
+        exit 1
+    fi
+done
+
+echo "✓ Tutti i moduli caricati con successo"
+echo ""
+
+# Colori per output più comprensibile
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Verifica prerequisiti di sistema
+echo "Verifica prerequisiti..."
+
+# Controlla Easy-RSA
+if [[ ! -d "/etc/easy-rsa" ]]; then
+    echo -e "${RED}✗ ERRORE: Directory /etc/easy-rsa non trovata!${NC}"
+    echo "Easy-RSA non sembra essere installato."
+    echo ""
+    echo "Per installare Easy-RSA:"
+    echo "• Debian/Ubuntu: sudo apt install easy-rsa"
+    echo "• CentOS/RHEL: sudo yum install easy-rsa"
+    echo ""
+    exit 1
+fi
+
+if [[ ! -f "/etc/easy-rsa/easyrsa" ]]; then
+    echo -e "${RED}✗ ERRORE: Script easyrsa non trovato!${NC}"
+    echo "Easy-RSA installato ma script principale mancante."
+    exit 1
+fi
+
+# Controlla permessi
+if [[ ! -w "/etc/easy-rsa" ]]; then
+    echo -e "${RED}✗ ERRORE: Permessi insufficienti su /etc/easy-rsa${NC}"
+    echo "Esegui il comando come amministratore:"
+    echo "sudo cert_manager"
+    exit 1
+fi
+
+echo "✓ Prerequisiti verificati con successo"
+echo ""
+
+# Verifica iniziale CA
+check_ca_files
+
+echo ""
+read -p "Premi INVIO per continuare..."
+
+# Funzione per stampare il titolo
+print_title() {
+    clear
+    echo -e "${BLUE}════════════════════════════════════════${NC}"
+    echo -e "${BLUE}           CERTIFICATE MANAGER          ${NC}"
+    echo -e "${BLUE}              Versione 2.0               ${NC}"
+    echo -e "${BLUE}════════════════════════════════════════${NC}"
+    echo ""
+}
+
+# Funzione per mostrare il menu principale
+show_menu() {
+    echo -e "${BLUE}===== MENU PRINCIPALE =====${NC}"
+    echo ""
+    echo "1) Verifica dati CA"
+    echo "2) Gestisci parametri VARS per CA"
+    echo "3) Genera nuovo certificato CA"
+    echo "4) Genera certificato server"
+    echo "5) Genera certificato client"
+    echo "6) Genera certificato da richiesta"
+    echo "7) Lista e gestione certificati"
+    echo "0) Esci"
+    echo ""
+}
+
+# Funzione per gestire la scelta del menu
+handle_menu_choice() {
+    local choice
+    read -p "Inserisci la tua scelta [0-7]: " choice
+    
+    case $choice in
+        1)
+            echo -e "${BLUE}Verifica dati CA...${NC}"
+            print_ca_data
+            ;;
+        2)
+            echo -e "${BLUE}Gestisci parametri VARS per CA...${NC}"
+            manage_vars_parameters
+            ;;
+        3)
+            echo -e "${BLUE}Generazione nuovo certificato CA...${NC}"
+            create_ca_files
+            ;;
+        4)
+            echo -e "${BLUE}Generazione certificato server...${NC}"
+            generate_server_certificate
+            ;;
+        5)
+            echo -e "${BLUE}Generazione certificato client...${NC}"
+            generate_client_certificate
+            ;;
+        6)
+            echo -e "${BLUE}Genera certificato da richiesta...${NC}"
+            process_pending_requests
+            ;;
+        7)
+            echo -e "${BLUE}Lista certificati...${NC}"
+            list_certificates
+            ;;
+        0)
+            echo -e "${GREEN}Arrivederci!${NC}"
+            echo "Certificate Manager terminato."
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}Scelta non valida. Riprova.${NC}"
+            ;;
+    esac
+}
+
+# Funzione principale
+main() {
+    # Stampa il titolo
+    print_title
+    
+    # Loop principale del menu
+    while true; do
+        show_menu
+        handle_menu_choice
+        echo ""
+        read -p "Premi INVIO per continuare..."
+        clear
+        print_title
+    done
+}
+
+# Avvia lo script
+main

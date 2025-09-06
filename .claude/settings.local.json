@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker-compose:*)",
+      "Bash(curl:*)",
+      "Bash(docker exec:*)",
+      "Bash(winpty docker exec -it cert-manager-web sh -c \"ls -la /opt/cert-manager/\")",
+      "Bash(docker logs:*)",
+      "Bash(winpty docker exec -it cert-manager-web sh -c \"ls -la /etc/easy-rsa/\")",
+      "Bash(docker volume:*)",
+      "Bash(mkdir:*)",
+      "Bash(cat:*)",
+      "Bash(docker inspect:*)",
+      "Bash(winpty docker exec -it cert-manager-web bash -c \"/opt/cert-manager/cert-manager-api check-ca\")",
+      "Bash(docker cp:*)",
+      "Bash(winpty docker exec -it cert-manager-web bash -c \"ls -la /etc/easy-rsa/pki/issued/\")",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

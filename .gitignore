@@ -1,0 +1,51 @@
+# Docker volumes and data
+web-interface/certificates/
+web-interface/volumes/
+certificates/
+*.tar.gz
+*.tar
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+web-interface/frontend/build/
+web-interface/frontend/dist/
+
+# Logs
+*.log
+logs/
+web-interface/logs/
+
+# Temporary files
+*.tmp
+*~
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# PKI sensitive data (if any gets generated locally)
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+pki/
+
+# Screenshots (optional - remove if you want to include them)
+Screenshots/
