@@ -252,8 +252,14 @@ The web application supports secure password hashing. Follow these steps:
 # Navigate to web-interface directory
 cd web-interface
 
+# Install dependencies (first time only)
+npm install
+
 # Generate secure hash for your password
 npm run hash-password "your-secure-password-here"
+
+# Alternative: Use Docker container
+docker-compose exec cert-manager-web npm run hash-password "your-secure-password-here"
 
 # Example output:
 # 🔐 Generating secure password hash...
