@@ -9,7 +9,7 @@ Certificate Manager è un sistema completo per la gestione di Certificate Author
 ### 🖥️ **Command Line Interface** 
 **Sistema modulare installabile tramite Make per uso tramite terminale**
 - Installazione: `sudo make install` 
-- Utilizzo: `cert-manager` (comando globale)
+- Utilizzo: `cert-manager` (comando globale) (--help configurato)
 - Target: Amministratori di sistema e utenti CLI
 
 ### 🌐 **Web Application Interface**
@@ -218,7 +218,9 @@ docker-compose ps
 # Security (CHANGE THESE!)
 JWT_SECRET=your-super-secret-jwt-key-change-this
 ADMIN_USER=admin
-ADMIN_PASS=your-secure-password-change-this
+
+# 🔐 SECURE PASSWORD CONFIGURATION (see Security Setup below)
+ADMIN_PASS_HASH=$2b$12$your.generated.hash.here
 
 # Server Configuration
 NODE_ENV=production
@@ -235,6 +237,80 @@ MAX_FILE_SIZE=10485760
 # Docker
 RESTART_POLICY=unless-stopped
 TZ=Europe/Rome
+```
+
+## 🔐 Security Setup (IMPORTANT!)
+
+### Secure Password Configuration
+
+**⚠️ CRITICAL: Never use plain text passwords in production!**
+
+The web application supports secure password hashing. Follow these steps:
+
+#### Step 1: Generate Password Hash
+```bash
+# Navigate to web-interface directory
+cd web-interface
+
+# Generate secure hash for your password
+npm run hash-password "your-secure-password-here"
+
+# Example output:
+# 🔐 Generating secure password hash...
+# ✅ Password hash generated successfully!
+# 🔑 Hash: $2b$12$K8nzqRQX9vQz.../4aGk2eLBvdwM6F8wQqB3pKxwMz2
+```
+
+#### Step 2: Configure Environment
+```bash
+# Copy environment template
+cp web-interface/.env.example web-interface/.env
+
+# Edit .env file and set:
+ADMIN_PASS_HASH=$2b$12$K8nzqRQX9vQz.../4aGk2eLBvdwM6F8wQqB3pKxwMz2
+
+# Remove any ADMIN_PASS lines for security
+```
+
+#### Step 3: Deploy
+```bash
+# Start application with secure configuration
+docker-compose up -d
+
+# Login with your ORIGINAL password (not the hash)
+# Username: admin
+# Password: your-secure-password-here
+```
+
+### Security Features
+✅ **Password Hashing**: bcrypt with 12 rounds (never stored in plain text)  
+✅ **Backward Compatibility**: Supports both hash and plain text (with warnings)  
+✅ **Runtime Warnings**: Alerts when using insecure configurations  
+✅ **Default Security**: Ships with pre-generated hash for default password
+
+### Password Security Best Practices
+- **Minimum Length**: 8+ characters with mixed case, numbers, symbols
+- **Unique**: Use different passwords for each service
+- **Storage**: Store original password securely (password manager)
+- **Rotation**: Change passwords periodically
+- **Hash Protection**: The hash is safe to store in configuration files
+
+### Migration from Plain Text
+If you're upgrading from plain text passwords:
+
+```bash
+# 1. Generate new hash
+cd web-interface
+npm run hash-password "your-existing-password"
+
+# 2. Update .env
+# Replace: ADMIN_PASS=your-password
+# With:    ADMIN_PASS_HASH=$2b$12$generated.hash.here
+
+# 3. Restart container
+docker-compose restart cert-manager-web
+
+# 4. Login with same original password
 ```
 
 ### VARS Configuration (Both Interfaces)

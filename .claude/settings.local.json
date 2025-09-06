@@ -21,7 +21,8 @@
       "Bash(docker container prune:*)",
       "Bash(docker stop:*)",
       "Bash(docker rm:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

@@ -145,11 +145,27 @@ app.post('/api/auth/login', [
 
     const { username, password } = req.body;
     
-    // Simple authentication (in production, use proper user management)
+    // Secure authentication with password hashing
     const validUsername = process.env.ADMIN_USER || 'admin';
-    const validPassword = process.env.ADMIN_PASS || 'admin123';
+    const validPasswordHash = process.env.ADMIN_PASS_HASH;
+    const fallbackPassword = process.env.ADMIN_PASS; // For backward compatibility
     
-    if (username === validUsername && password === validPassword) {
+    let isValidPassword = false;
+    
+    if (validPasswordHash) {
+      // Use secure hash comparison
+      isValidPassword = await bcrypt.compare(password, validPasswordHash);
+    } else if (fallbackPassword) {
+      // Fallback to plain text (show warning)
+      console.warn('⚠️  WARNING: Using plain text password. Please use ADMIN_PASS_HASH for security!');
+      isValidPassword = (password === fallbackPassword);
+    } else {
+      // Default fallback
+      console.warn('⚠️  WARNING: Using default credentials. Please configure ADMIN_PASS_HASH!');
+      isValidPassword = (password === 'change-this-password');
+    }
+    
+    if (username === validUsername && isValidPassword) {
       const token = jwt.sign(
         { username, role: 'admin' },
         process.env.JWT_SECRET || 'default-secret',

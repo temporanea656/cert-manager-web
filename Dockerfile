@@ -49,6 +49,7 @@ RUN npm install --only=production && npm cache clean --force
 
 # Copy backend source code
 COPY web-interface/server.js ./
+COPY web-interface/hash-password.js ./
 COPY web-interface/.env.example ./.env
 
 # Copy built frontend from builder stage
